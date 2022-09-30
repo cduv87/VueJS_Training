@@ -6,15 +6,17 @@
             {{secretMsg}}
       </h1>
       <ul>
-        <div v-for="attack in attacks" v-bind:key="attack.id">
-          <li>{{attack.text}}</li><button @click="removeAttack(attack)">X</button>
+        <div v-for="attack in filteredAttacks" v-bind:key="attack.id">
+          <input type="checkbox" v-model="attack.done"><li>{{attack.text}}</li><button @click="removeAttack(attack)">X</button>
         </div>
       </ul>
       <form @submit.prevent="addAttack">
         <input v-model="newAttack">
         <button>Add Attack</button>    
       </form>
-      <p>{{newAttack}}</p>
+      <button @click="hideCompleted = !hideCompleted">
+      {{ hideCompleted ? 'Show all' : 'Hide completed' }}
+      </button>
     </div>
     <div>
       <h1 v-bind:class="titleClass">{{text}}</h1>
@@ -28,7 +30,7 @@
       <input v-model="text">
     </div>
     <div>
-
+      <button @click="onDemandLog">AttacksLog</button>
     </div>
 </template>
   
@@ -39,13 +41,21 @@
   props: {
     secretMsg: String
   },
+  computed: {
+    filteredAttacks() {
+      return this.hideCompleted
+        ? this.attacks.filter((t) => !t.done)
+        : this.attacks
+    }
+  },
   data() {
     return {
+      hideCompleted: false,
       newAttack: '',
       attacks: [
-        { id: id++, text: "TRanch'Herbe" },
-        { id: id++, text: "Meteore" },
-        { id: id++, text: "Coupe" }
+        { id: id++, text: "TRanch'Herbe", done: false },
+        { id: id++, text: "Meteore", done: false },
+        { id: id++, text: "Coupe", done: false }
       ],
       text: 'blue',
       titleClass: 'red',
@@ -63,13 +73,21 @@
     // as the argument.
     this.text = e.target.value
     },
+    getDone(attackDone) {
+      attackDone.done = true
+      this.attacks[attackDone.id] = attackDone
+    },
     addAttack() {
-      let tmp =  { id: id++, text: this.newAttack }
+      let tmp =  { id: id++, text: this.newAttack, done: false }
       this.attacks.push(tmp)
+      this.newAttack = ''
       // console.log(this.attacks)
     },
     removeAttack(attackToDel) {
       this.attacks = this.attacks.filter((attack)=> attack !== attackToDel )
+    },
+    onDemandLog() {
+      console.log(this.attacks)
     }
   }
 }
